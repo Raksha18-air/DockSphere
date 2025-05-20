@@ -1,0 +1,4 @@
+Flask
+requests
+py3Dmol
+rdkit
