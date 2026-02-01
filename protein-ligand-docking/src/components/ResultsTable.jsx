@@ -11,10 +11,12 @@ const ResultsTable = () => {
 
     console.log("Docking Results from Context:", dockingResults);
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
     const handleDownload = (protein, ligand) => {
         console.log(`Downloading file for: Protein - ${protein}, Ligand - ${ligand}`);
         
-        axios.get(`http://127.0.0.1:5000/api/download?protein=${protein}&ligand=${ligand}`, { responseType: "blob" })
+        axios.get(`${API_BASE_URL}/api/download?protein=${protein}&ligand=${ligand}`, { responseType: "blob" })
             .then(response => {
                 console.log("File downloaded successfully!");
                 
@@ -32,7 +34,7 @@ const ResultsTable = () => {
     const handleVisualize = (protein, ligand) => {
         console.log(`Fetching complex file for: Protein - ${protein}, Ligand - ${ligand}`);
         
-        axios.get(`http://127.0.0.1:5000/api/get_complex_file?protein=${protein}&ligand=${ligand}`)
+        axios.get(`${API_BASE_URL}/api/get_complex_file?protein=${protein}&ligand=${ligand}`)
             .then(response => {
                 console.log("Received response for visualization:", response.data);
 

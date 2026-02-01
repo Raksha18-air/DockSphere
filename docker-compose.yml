@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+
+  docking-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: docking-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - backend/.env
+    volumes:
+      - ./data/uploads:/app/uploads
+      - ./data/results:/app/results
+    restart: unless-stopped
+
+  docking-frontend:
+    build:
+      context: .
+      dockerfile: protein-ligand-docking/Dockerfile
+    container_name: docking-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - docking-backend
+    restart: unless-stopped

@@ -21,6 +21,8 @@ const UploadForm = () => {
 
     const isSubmitDisabled = inputType === "pdb_files" && (proteinFiles.length === 0 || ligandFiles.length === 0);
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
     const handleSubmit = async () => {
         setIsLoading(true);
         const formData = new FormData();
@@ -35,7 +37,7 @@ const UploadForm = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/api/upload", {
+            const response = await fetch(`${API_BASE_URL}/api/upload`, {
                 method: "POST",
                 body: formData
             });

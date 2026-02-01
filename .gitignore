@@ -1,0 +1,4 @@
+backend/.env
+protein-ligand-docking/.env
+backend/__pycache__/
+protein-ligand-docking/node_modules/

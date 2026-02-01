@@ -15,10 +15,13 @@ app = Flask(__name__)
 CORS(app)
 
 # Paths to required tools and directories
-MGLTOOLS_PATH = r"C:\Program Files (x86)\MGLTools-1.5.7\Lib\site-packages\AutoDockTools\Utilities24"
-VINA_PATH = r"C:\Program Files (x86)\The Scripps Research Institute\Vina\vina.exe"
-UPLOAD_FOLDER = 'uploads'
-RESULT_FOLDER = 'results'
+MGLTOOLS_PATH = os.environ.get("MGLTOOLS_PATH", "/opt/mgltools/MGLToolsPckgs/AutoDockTools/Utilities24")
+VINA_PATH = os.environ.get("VINA_PATH", "/usr/local/bin/vina")
+MGL_PYTHON = os.environ.get("MGL_PYTHON", "/opt/mgltools/bin/python")
+
+UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "/app/uploads")
+RESULT_FOLDER = os.environ.get("RESULT_FOLDER", "/app/results")
+
 PROTEIN_PDBQT_DIR = os.path.join(RESULT_FOLDER, "proteins_pdbqt")
 LIGAND_PDBQT_DIR = os.path.join(RESULT_FOLDER, "ligands_pdbqt")
 DOCKING_RESULTS_DIR = os.path.join(RESULT_FOLDER, "docking_result")
@@ -409,5 +412,5 @@ def get_pdb_data():
     return jsonify({"pdb": open("results/docking_result/complex_1I78_eugenol.pdb").read()})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
 

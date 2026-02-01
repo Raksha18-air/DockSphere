@@ -14,6 +14,8 @@ const Visualization = () => {
     const viewerContainerRef = useRef(null);
     const viewerRef = useRef(null);
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
     useEffect(() => {
         if (selectedFile) {
             console.log("Selected file:", selectedFile);
@@ -21,7 +23,7 @@ const Visualization = () => {
 
             const encodedFileName = encodeURIComponent(selectedFile);
 
-            axios.get(`http://127.0.0.1:5000/api/visualize_pdb?file_name=${encodedFileName}`)
+            axios.get(`${API_BASE_URL}/api/visualize_pdb?file_name=${encodedFileName}`)
                 .then(response => {
                     console.log("API Response:", response);
                     if (response.data.pdb_data) {
