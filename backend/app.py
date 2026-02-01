@@ -99,7 +99,7 @@ def convert_to_pdbqt(input_file, output_file, file_type):
     if not os.path.exists(input_file):
         raise FileNotFoundError(f"Input file not found: {input_file}")
 
-    python_exe = os.path.join(r"C:\Program Files (x86)\MGLTools-1.5.7", "python.exe")
+    python_exe = MGL_PYTHON
     if not os.path.exists(python_exe):
         raise FileNotFoundError(f"Python executable not found: {python_exe}")
 
@@ -141,7 +141,7 @@ def calculate_center(pdbqt_file):
 
 #Function to convert pdbqt to pdb
 def pdbqt_to_pdb(pdbqt_file, output_file):
-    python_exe = os.path.join(r"C:\Program Files (x86)\MGLTools-1.5.7", "python.exe")
+    python_exe = MGL_PYTHON
     prepare_script = os.path.join(MGLTOOLS_PATH, "pdbqt_to_pdb.py")
     command = [
         python_exe,
