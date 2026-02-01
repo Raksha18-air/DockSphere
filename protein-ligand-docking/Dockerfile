@@ -19,11 +19,8 @@ RUN npm run build
 # =========================
 FROM nginx:alpine
 
-# Remove default nginx static files
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy React build to Nginx
-COPY --from=build /frontend/build /usr/share/nginx/html
+COPY protein-ligand-docking/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
 
