@@ -37,7 +37,7 @@ const UploadForm = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/upload`, {
+            const response = await fetch(`${API_BASE_URL}/upload`, {
                 method: "POST",
                 body: formData
             });
