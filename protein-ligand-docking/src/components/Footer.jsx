@@ -19,7 +19,7 @@ const Footer = () => {
             >
                 <Toolbar sx={{ flexDirection: "column", textAlign: "center", py: 2 }}>
                     <Typography variant="body2" color="inherit">
-                        &copy; 2025 DockSphere 🌍 | Managed by Nanobiotechnology Lab, JBMSHST, IIT Guwahati.
+                        &copy; 2025 DockSphere 🌍 | Managed by Raksha Ray.
                     </Typography>
                     <Typography variant="body2" color="inherit">
                         Designed and Developed by Raksha Ray
