@@ -23,7 +23,7 @@ const Visualization = () => {
 
             const encodedFileName = encodeURIComponent(selectedFile);
 
-            axios.get(`${API_BASE_URL}/api/visualize_pdb?file_name=${encodedFileName}`)
+            axios.get(`${API_BASE_URL}/visualize_pdb?file_name=${encodedFileName}`)
                 .then(response => {
                     console.log("API Response:", response);
                     if (response.data.pdb_data) {
