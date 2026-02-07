@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { Card, CardContent, Typography, CircularProgress, IconButton } from "@mui/material";
+import { Card, CardContent, Typography, CircularProgress, IconButton, Alert } from "@mui/material";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -11,6 +11,7 @@ const Visualization = () => {
     const { selectedFile } = useContext(DockingContext);
     const [loading, setLoading] = useState(false);
     const [pdbData, setPdbData] = useState("");
+    const [error, setError] = useState(null);
     const viewerContainerRef = useRef(null);
     const viewerRef = useRef(null);
 
@@ -20,6 +21,7 @@ const Visualization = () => {
         if (selectedFile) {
             console.log("Selected file:", selectedFile);
             setLoading(true);
+            setError(null);
 
             const encodedFileName = encodeURIComponent(selectedFile);
 
@@ -27,14 +29,17 @@ const Visualization = () => {
                 .then(response => {
                     console.log("API Response:", response);
                     if (response.data.pdb_data) {
-                        console.log("PDB Data received!", response.data.pdb_data);
+                        console.log("PDB Data received!");
                         setPdbData(response.data.pdb_data);
+                        setError(null);
                     } else {
                         console.error("PDB Data missing in response:", response.data);
+                        setError("Failed to load visualization data");
                     }
                 })
                 .catch(error => {
                     console.error("Error fetching PDB data:", error);
+                    setError("Failed to fetch visualization data. Please try again.");
                 })
                 .finally(() => {
                     setLoading(false);
@@ -54,31 +59,39 @@ const Visualization = () => {
                     return;
                 }
 
-                // Purana viewer clear karo agar exist karta hai
+                // Clear old viewer if it exists
                 if (viewerRef.current) {
                     viewerRef.current.clear();
                     viewerRef.current = null;
                 }
+                
+                // Create new viewer
                 viewerRef.current = window.$3Dmol.createViewer(container, { backgroundColor: "white" });
 
                 let viewer = viewerRef.current;
                 viewer.clear();
 
+                // Add model and apply styling
                 let model = viewer.addModel(pdbData, "pdb");
                 console.log("Applying visualization style...");
+                
+                // Style protein
                 model.setStyle({}, { line: { color: "green", linewidth: 1.5 } });
-                model.setStyle({ hetflag: true }, { stick: { radius: 0.3 } });
+                
+                // Style ligand (heteroatoms)
+                model.setStyle({ hetflag: true }, { stick: { radius: 0.3, colorscheme: 'Jmol' } });
 
                 viewer.zoomTo();
                 viewer.render();
                 console.log("Viewer render complete!");
             } catch (error) {
                 console.error("Error in 3Dmol.js visualization:", error);
+                setError("Failed to render 3D visualization");
             }
         }
     }, [pdbData]);
 
-    // 🔍 Zoom In
+    // Zoom In
     const zoomIn = () => {
         if (viewerRef.current) {
             viewerRef.current.zoom(1.2);
@@ -86,7 +99,7 @@ const Visualization = () => {
         }
     };
 
-    // 🔍 Zoom Out
+    // Zoom Out
     const zoomOut = () => {
         if (viewerRef.current) {
             viewerRef.current.zoom(0.8);
@@ -94,7 +107,7 @@ const Visualization = () => {
         }
     };
 
-    // 🔄 Reset View
+    // Reset View
     const resetView = () => {
         if (viewerRef.current) {
             viewerRef.current.zoomTo();
@@ -102,12 +115,14 @@ const Visualization = () => {
         }
     };
 
-    // 🖥 Fullscreen Toggle
+    // Fullscreen Toggle
     const toggleFullscreen = () => {
         const elem = viewerContainerRef.current;
         if (elem) {
             if (!document.fullscreenElement) {
-                elem.requestFullscreen();
+                elem.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen:", err);
+                });
             } else {
                 document.exitFullscreen();
             }
@@ -121,8 +136,19 @@ const Visualization = () => {
                     Protein-Ligand 3D Visualization
                 </Typography>
 
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                )}
+
                 {loading ? (
-                    <CircularProgress />
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 500 }}>
+                        <CircularProgress />
+                        <Typography variant="body2" sx={{ ml: 2 }}>
+                            Loading visualization...
+                        </Typography>
+                    </Box>
                 ) : selectedFile && pdbData ? (
                     <div 
                         style={{
@@ -152,9 +178,10 @@ const Visualization = () => {
                                 right: "10px",
                                 display: "flex",
                                 flexDirection: "column",
-                                background: "rgba(255, 255, 255, 0.8)",
+                                background: "rgba(255, 255, 255, 0.9)",
                                 borderRadius: "8px",
-                                padding: "5px"
+                                padding: "5px",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
                             }}
                         >
                             <IconButton onClick={zoomIn} size="small" title="Zoom In">
@@ -172,7 +199,9 @@ const Visualization = () => {
                         </div>
                     </div>
                 ) : (
-                    <Typography>No file selected for visualization.</Typography>
+                    <Typography color="textSecondary" sx={{ mt: 4 }}>
+                        No file selected for visualization. Please select a result to visualize.
+                    </Typography>
                 )}
             </CardContent>
         </Card>
