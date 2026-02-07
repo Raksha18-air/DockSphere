@@ -2,6 +2,26 @@ version: "3.8"
 
 services:
 
+  # =========================
+  # Redis (Broker + Backend)
+  # =========================
+  redis:
+    image: redis:7-alpine
+    container_name: docking-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================
+  # Flask Backend (API + Web)
+  # =========================
   docking-backend:
     build:
       context: .
@@ -11,11 +31,68 @@ services:
       - "5000:5000"
     env_file:
       - backend/.env
+    environment:
+      - BASE_FOLDER=/app/jobs
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MGLTOOLS_PATH=/opt/mgltools/MGLToolsPckgs/AutoDockTools/Utilities24
+      - MGL_PYTHON=/opt/mgltools/bin/python2.7
+      - VINA_PATH=/usr/local/bin/vina
+      
     volumes:
-      - ./data/uploads:/app/uploads
-      - ./data/results:/app/results
+       - ./data/jobs:/app/jobs
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+    command: python3 app.py
 
+  # =========================
+  # Celery Worker (Docking Jobs)
+  # =========================
+  celery-worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: docking-celery-worker
+    environment:
+      - BASE_FOLDER=/app/jobs
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MGLTOOLS_PATH=/opt/mgltools/MGLToolsPckgs/AutoDockTools/Utilities24
+      - MGL_PYTHON=/opt/mgltools/bin/python2.7
+      - VINA_PATH=/usr/local/bin/vina
+      
+    volumes:
+        - ./data/jobs:/app/jobs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    # Adjust concurrency based on EC2 size
+    command: celery -A app.celery worker --loglevel=info --concurrency=2
+
+  # =========================
+  # Flower (Celery Monitoring UI)
+  # =========================
+  # build:
+  #    context: .
+  #    dockerfile: backend/Dockerfile
+  # container_name: docking-flower
+  # ports:
+  #   - "5555:5555"
+  # environment:
+  #   - CELERY_BROKER_URL=redis://redis:6379/0
+  #   - CELERY_RESULT_BACKEND=redis://redis:6379/0
+  # depends_on:
+  #   redis:
+  #     condition: service_healthy
+  # restart: unless-stopped
+  # command: celery -A app.celery flower --port=5555
+
+  # =========================
+  # Frontend (React + Nginx)
+  # =========================
   docking-frontend:
     build:
       context: .
@@ -26,3 +103,7 @@ services:
     depends_on:
       - docking-backend
     restart: unless-stopped
+
+
+volumes:
+  redis_data:
