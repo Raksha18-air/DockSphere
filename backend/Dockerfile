@@ -72,8 +72,9 @@ RUN pip3 install celery redis flower
 COPY backend/ /app/
 
 # Create necessary directories
-RUN mkdir -p /app/uploads /app/results /app/results/proteins_pdbqt \
-    /app/results/ligands_pdbqt /app/results/docking_result
+RUN mkdir -p \
+    /app/jobs
+
 
 # =========================
 # Expose Ports
